@@ -33,17 +33,19 @@
 		check();
 	};
 		
-	// Check all listeners to see if they are ready
+	// Check if any elements have been added to the DOM
 	function check(){
-		var i = 0, len = listeners.length, n = 0, nLen, listener, elements, element;
-		for(; i < len; i++){
+		for(var i = 0, len = listeners.length, listener, elements; i < len; i++){
 			listener = listeners[i];
+			// Query for elements matching the specified selector
 			elements = doc.querySelectorAll(listener.selector);
-			nLen = elements.length;
-			for(; n < nLen; n++){
-				element = elements[n];
+			for(var j = 0, jLen = elements.length, element; j < jLen; j++){
+				element = elements[j];
+				// Make sure the callback isn't invoked with the same element
+				// more than once
 				if(!element.ready){
 					element.ready = true;
+					// Invoke the callback with the element
 					listener.fn.call(element, element);
 				}
 			}
