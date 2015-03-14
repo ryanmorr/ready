@@ -19,6 +19,7 @@ describe('ready', function(){
             expect(spy.calledOnce).to.equal(true);
             expect(added).to.equal(element);
             expect(document.body.contains(added)).to.equal(true);
+            expect(spy.calledOn(added)).to.equal(true);
             done();
         });
         ready('.bar', spy);
@@ -34,6 +35,7 @@ describe('ready', function(){
         spy = sinon.spy(function(added){
             expect(added).to.equal(elements[spy.callCount - 1]);
             expect(document.body.contains(added)).to.equal(true);
+            expect(spy.calledOn(added)).to.equal(true);
             if(spy.calledThrice){
                 done();    
             }
