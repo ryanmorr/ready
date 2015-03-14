@@ -29,10 +29,10 @@
 				childList: true,
 				subtree: true
 			});
-			// disconnect on `unload` to avoid memory leaks
+			// Disconnect on `unload` to avoid memory leaks
 			win.addEventListener('unload', observer.disconnect.bind(observer), false);
 		}
-		// Check elements currently in the DOM
+		// Check if the element is currently in the DOM
 		check();
 	}
 		
