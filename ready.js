@@ -14,16 +14,13 @@
 	observer;
 	
 	function ready(selector, fn){
-		// Append the selector and function to an array so 
-		// that it may be monitored
+		// Store the selector and callback to be monitored
 		listeners.push({
 			selector: selector,
 			fn: fn
 		});
-		// Create observer once
 		if(!observer){
-			// Watch for changes in the document including
-			// all child nodes
+			// Watch for changes in the document
 			observer = new MutationObserver(check);
 			observer.observe(doc.documentElement, {
 				childList: true,
@@ -36,9 +33,8 @@
 		check();
 	}
 		
-	// Check if any elements being watched have been 
-	// added to the DOM
 	function check(){
+		// Check the DOM for elements matching a stored selector
 		for(var i = 0, len = listeners.length, listener, elements; i < len; i++){
 			listener = listeners[i];
 			// Query for elements matching the specified selector
