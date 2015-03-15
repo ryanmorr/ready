@@ -26,8 +26,6 @@
 				childList: true,
 				subtree: true
 			});
-			// Disconnect on `unload` to avoid memory leaks
-			win.addEventListener('unload', observer.disconnect.bind(observer), false);
 		}
 		// Check if the element is currently in the DOM
 		check();
