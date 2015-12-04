@@ -21,31 +21,35 @@
         });
         if(!observer){
             // Watch for changes in the document
-            observer = new MutationObserver(check);
+            observer = new MutationObserver(checkListeners);
             observer.observe(doc.documentElement, {
                 childList: true,
                 subtree: true
             });
         }
         // Check if the element is currently in the DOM
-        check();
+        check(selector, fn);
     }
 
-    function check(){
+    function checkListeners(){
         // Check the DOM for elements matching a stored selector
-        for(var i = 0, len = listeners.length, listener, elements; i < len; i++){
+        for(var i = 0, len = listeners.length, listener; i < len; i++){
             listener = listeners[i];
-            // Query for elements matching the specified selector
-            elements = doc.querySelectorAll(listener.selector);
-            for(var j = 0, jLen = elements.length, element; j < jLen; j++){
-                element = elements[j];
-                // Make sure the callback isn't invoked with the 
-                // same element more than once
-                if(!element.ready){
-                    element.ready = true;
-                    // Invoke the callback with the element
-                    listener.fn.call(element, element);
-                }
+            check(listener.selector, listener.fn);
+        }
+    }
+
+    function check(selector, fn){
+        // Query for elements matching the specified selector
+        var elements = doc.querySelectorAll(selector), i = 0, len = elements.length, element;
+        for(; i < len; i++){
+            element = elements[i];
+            // Make sure the callback isn't invoked with the 
+            // same element more than once
+            if(!element.ready){
+                element.ready = true;
+                // Invoke the callback with the element
+                fn.call(element, element);
             }
         }
     }
