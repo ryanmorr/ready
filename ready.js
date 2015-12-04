@@ -28,18 +28,18 @@
             });
         }
         // Check if the element is currently in the DOM
-        check(selector, fn);
+        checkSelector(selector, fn);
     }
 
     function checkListeners(){
         // Check the DOM for elements matching a stored selector
         for(var i = 0, len = listeners.length, listener; i < len; i++){
             listener = listeners[i];
-            check(listener.selector, listener.fn);
+            checkSelector(listener.selector, listener.fn);
         }
     }
 
-    function check(selector, fn){
+    function checkSelector(selector, fn){
         // Query for elements matching the specified selector
         var elements = doc.querySelectorAll(selector), i = 0, len = elements.length, element;
         for(; i < len; i++){
