@@ -69,6 +69,12 @@
     }
 
     // Expose `ready`
-    win.ready = ready;
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = ready;
+    } else if(typeof define === 'function' && define.amd) {
+        define(function(){ return ready; });
+    } else {
+        win['ready'] = ready;
+    }
             
 })(this);
