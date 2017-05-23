@@ -1,21 +1,23 @@
-describe('ready', function(){
-    'use strict';
+/* eslint-disable max-len */
 
-    var expect = chai.expect;
+import { expect } from 'chai';
+import sinon from 'sinon';
+import ready from '../../src/ready';
 
-    it('should immediately invoke the callback if the element is already available', function(){
-        var spy = sinon.spy();
+describe('ready', () => {
+    it('should immediately invoke the callback if the element is already available', () => {
+        const spy = sinon.spy();
         ready('#container', spy);
         expect(spy.calledOnce).to.equal(true);
-        var element = spy.getCall(0).args[0];
+        const element = spy.getCall(0).args[0];
         expect(element.id).to.equal('container');
         expect(document.body.contains(element)).to.equal(true);
         expect(spy.calledOn(element)).to.equal(true);
     });
 
-    it('should invoke the callback when an element is appended to the document dynamically', function(done){
-        var element,
-        spy = sinon.spy(function(added){
+    it('should invoke the callback when an element is appended to the document dynamically', (done) => {
+        let element;
+        const spy = sinon.spy((added) => {
             expect(spy.calledOnce).to.equal(true);
             expect(added).to.equal(element);
             expect(document.body.contains(added)).to.equal(true);
@@ -23,28 +25,28 @@ describe('ready', function(){
             done();
         });
         ready('.bar', spy);
-        setTimeout(function(){
+        setTimeout(() => {
             element = document.createElement('div');
             element.className = 'bar';
             document.body.appendChild(element);
         }, 200);
     });
 
-    it('should invoke the callback for multiple elements that match the selector', function(done){
-        var elements = [],
-        spy = sinon.spy(function(added){
+    it('should invoke the callback for multiple elements that match the selector', (done) => {
+        const elements = [];
+        const spy = sinon.spy((added) => {
             expect(added).to.equal(elements[spy.callCount - 1]);
             expect(document.body.contains(added)).to.equal(true);
             expect(spy.calledOn(added)).to.equal(true);
-            if(spy.calledThrice){
-                done();    
+            if (spy.calledThrice) {
+                done();
             }
         });
         ready('.baz.qux', spy);
-        setTimeout(function(){
-            var frag = document.createDocumentFragment();
-            ['div', 'span', 'section'].forEach(function(tag){
-                var element = document.createElement(tag);
+        setTimeout(() => {
+            const frag = document.createDocumentFragment();
+            ['div', 'span', 'section'].forEach((tag) => {
+                const element = document.createElement(tag);
                 element.className = 'baz qux';
                 frag.appendChild(element);
                 elements.push(element);
@@ -52,5 +54,4 @@ describe('ready', function(){
             document.body.appendChild(frag);
         }, 200);
     });
-
 });
