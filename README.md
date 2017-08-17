@@ -10,11 +10,11 @@
 
 ## Usage
 
-Provide a selector string for the element(s) you want to target as the first argument and a callback function as the second argument:
+Provide a selector string for the element(s) you want to target as the first argument and a callback function as the second argument. It returns a function that stops observing for new elements only for that particular selector/callback combination:
 
 ``` javascript
-ready('.foo', (element) => {
-    // do something
+const off = ready('.foo', (element) => {
+    off(); // Stop observing for .foo elements
 });
 ```
 
