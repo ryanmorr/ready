@@ -1,19 +1,20 @@
 import ready from '../../src/ready';
 
-function timeout(fn) {
-    setTimeout(fn, 100);
-}
-
 describe('ready', () => {
     it('should immediately invoke the callback if the element is already available', () => {
+        const div = document.createElement('div');
+        div.id = 'foo';
+        document.body.appendChild(div);
+
         const spy = sinon.spy();
-        const off = ready('#container', spy);
+        const off = ready('#foo', spy);
 
         expect(spy.calledOnce).to.equal(true);
         const element = spy.getCall(0).args[0];
-        expect(element.id).to.equal('container');
+        expect(element).to.equal(div);
         expect(document.body.contains(element)).to.equal(true);
         expect(spy.calledOn(element)).to.equal(true);
+
         document.body.removeChild(element);
         off();
     });
@@ -22,20 +23,20 @@ describe('ready', () => {
         const element = document.createElement('div');
         element.className = 'bar';
 
-        let off = 1;
         const spy = sinon.spy((added) => {
             expect(spy.calledOnce).to.equal(true);
             expect(added).to.equal(element);
             expect(document.body.contains(added)).to.equal(true);
             expect(spy.calledOn(added)).to.equal(true);
+
             document.body.removeChild(element);
             off();
             done();
         });
 
-        off = ready('.bar', spy);
+        const off = ready('.bar', spy);
 
-        timeout(() => document.body.appendChild(element));
+        requestAnimationFrame(() => document.body.appendChild(element));
     });
 
     it('should invoke the callback for multiple elements that match the selector', (done) => {
@@ -48,11 +49,11 @@ describe('ready', () => {
             elements.push(element);
         });
 
-        let off = 1;
         const spy = sinon.spy((added) => {
             expect(added).to.equal(elements[spy.callCount - 1]);
             expect(document.body.contains(added)).to.equal(true);
             expect(spy.calledOn(added)).to.equal(true);
+
             if (spy.calledThrice) {
                 elements.forEach((el) => document.body.removeChild(el));
                 off();
@@ -60,9 +61,9 @@ describe('ready', () => {
             }
         });
 
-        off = ready('.baz.qux', spy);
+        const off = ready('.baz.qux', spy);
 
-        timeout(() => document.body.appendChild(frag));
+        requestAnimationFrame(() => document.body.appendChild(frag));
     });
 
     it('should return a function that stops observing for new elements when invoked', (done) => {
@@ -75,7 +76,7 @@ describe('ready', () => {
         off();
         document.body.appendChild(element);
 
-        timeout(() => {
+        requestAnimationFrame(() => {
             expect(spy.called).to.equal(false);
             document.body.removeChild(element);
             done();
@@ -83,7 +84,6 @@ describe('ready', () => {
     });
 
     it('should disconnect the mutation observer when all listeners have been removed', () => {
-        const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
         const mutationSpy = sinon.spy(MutationObserver.prototype, 'disconnect');
 
         const off1 = ready('.aaa', () => {});
@@ -91,8 +91,10 @@ describe('ready', () => {
 
         off1();
         expect(mutationSpy.called).to.equal(false);
+
         off2();
         expect(mutationSpy.called).to.equal(true);
+
         mutationSpy.restore();
     });
 });
