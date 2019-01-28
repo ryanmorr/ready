@@ -4,7 +4,6 @@
 let observer;
 const listeners = [];
 const doc = window.document;
-const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 /*
  * Checks a selector for new matching
