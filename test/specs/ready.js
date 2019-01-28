@@ -1,7 +1,3 @@
-/* eslint-disable max-len */
-
-import { expect } from 'chai';
-import sinon from 'sinon';
 import ready from '../../src/ready';
 
 function timeout(fn) {

@@ -5,83 +5,91 @@ import uglify from 'gulp-uglify';
 import header from 'gulp-header';
 import rename from 'gulp-rename';
 import sourcemaps from 'gulp-sourcemaps';
-import mocha from 'gulp-mocha-phantomjs';
 import browserify from 'browserify';
 import babelify from 'babelify';
 import del from 'del';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
+import { Server } from 'karma';
 
-const banner = '/*! ${pkg.name} v${pkg.version} | ${pkg.homepage} */\n';
+const banner = `/*! ${pkg.name} v${pkg.version} | ${pkg.homepage} */\n`;
 
 const config = {
-    src: {
-        files: './src/**/*.js',
-        entryFile: './src/ready.js',
-        outputFile: 'ready.js',
-        outputDir: './dist/'
+    files: './src/**/*.js',
+    entryFile: './src/ready.js',
+    outputFile: 'ready.js',
+    outputDir: './dist/',
+    specs: './test/specs/**/*.js'
+};
+
+const karmaConfig = {
+    basePath: __dirname,
+    frameworks: ['browserify', 'mocha', 'chai', 'sinon', 'source-map-support'],
+    files: [config.specs],
+    preprocessors: {[config.specs]: ['browserify']},
+    browserify: {
+        debug: true,
+        transform: [
+            ['babelify', {plugins: ['istanbul']}]
+        ]
     },
-    test: {
-        runner: './test/runner.html',
-        specs: './test/specs/*.js',
-        entryFile: './test/specs/ready.js',
-        outputDir: './test/',
-        outputFile: 'tests.js'
-    }
+    coverageReporter: {
+        type: 'html',
+        dir: './test/coverage/'
+    },
+    browsers: ['ChromeHeadless'],
+    autoWatch: false,
+    singleRun: true
 };
 
 gulp.task('clean', () => {
-    return del.sync([config.src.outputDir]);
-});
-
-gulp.task('clean:test', () => {
-    return del.sync([config.test.outputDir + config.test.outputFile]);
+    return del.sync([config.outputDir]);
 });
 
 gulp.task('build', ['clean'], () => {
-    return browserify(config.src.entryFile, {debug: true, standalone: pkg.name})
+    return browserify(config.entryFile, {debug: true, standalone: pkg.name})
         .transform(babelify)
         .bundle()
-        .pipe(source(config.src.outputFile))
+        .pipe(source(config.outputFile))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(header(banner, {pkg}))
-        .pipe(gulp.dest(config.src.outputDir))
+        .pipe(gulp.dest(config.outputDir))
         .pipe(uglify())
         .pipe(rename({suffix: '.min'}))
         .pipe(header(banner, {pkg}))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(config.src.outputDir));
-});
-
-gulp.task('build:test', ['clean:test'], () => {
-    return browserify(config.test.entryFile)
-        .transform(babelify)
-        .bundle()
-        .pipe(source(config.test.outputFile))
-        .pipe(buffer())
-        .pipe(gulp.dest(config.test.outputDir));
+        .pipe(gulp.dest(config.outputDir));
 });
 
 gulp.task('lint', () => {
-    return gulp.src(['./gulpfile.babel.js', config.src.files, config.test.specs])
+    return gulp.src(['./gulpfile.babel.js', config.files, config.specs])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
 });
 
-gulp.task('test', ['build:test'], () => {
-    return gulp.src(config.test.runner)
-        .pipe(mocha());
+gulp.task('test', () => {
+    karmaConfig.reporters = ['mocha'];
+    new Server(karmaConfig, (code) => {
+        process.exit(code);
+    }).start();
+});
+
+gulp.task('coverage', () => {
+    karmaConfig.reporters = ['mocha', 'coverage'];
+    new Server(karmaConfig, (code) => {
+        process.exit(code);
+    }).start();
 });
 
 gulp.task('watch', () => {
-    gulp.watch(['./gulpfile.babel.js', config.src.files, config.test.specs], ['lint', 'test']);
+    gulp.watch(['./gulpfile.babel.js', config.files, config.specs], ['lint', 'test']);
 });
 
 gulp.task('default', [
     'lint',
-    'test',
+    'coverage',
     'build',
     'watch'
 ]);

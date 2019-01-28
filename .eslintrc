@@ -10,11 +10,6 @@
     "node": true,
     "mocha": true
   },
-  "globals": {
-    "require": true,
-    "define": true,
-    "module": true
-  },
   "rules": {
     ////////// Errors //////////
 
