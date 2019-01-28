@@ -5,6 +5,24 @@ let observer;
 const listeners = [];
 const doc = window.document;
 const documentElement = doc.documentElement;
+let docReady = /complete|loaded|interactive/.test(doc.readyState);
+
+/**
+ * Check if the DOM is already loaded
+ */
+if (!docReady) {
+    doc.addEventListener('DOMContentLoaded', () => {
+        docReady = true;
+        let i = listeners.length;
+        while (i--) {
+            const listener = listeners[i];
+            if (listener.selector === doc) {
+                listener.callback.call(doc, doc);
+                listeners.splice(i, 1);
+            }
+        }
+    });
+}
 
 /*
  * Find the supported version of `matches`
@@ -58,21 +76,19 @@ function checkMutations(mutations) {
 /*
  * Remove a listener
  *
- * @param {String} selector
- * @param {Function} callback
+ * @param {Object} listener
  * @api private
  */
-function removeListener(selector, callback) {
+function removeListener(listener) {
     let i = listeners.length;
     while (i--) {
-        const listener = listeners[i];
-        if (listener.selector === selector && listener.callback === callback) {
+        if (listener === listeners[i]) {
             listeners.splice(i, 1);
-            if (!listeners.length && observer) {
-                observer.disconnect();
-                observer = null;
-            }
         }
+    }
+    if (!listeners.length && observer) {
+        observer.disconnect();
+        observer = null;
     }
 }
 
@@ -80,7 +96,7 @@ function removeListener(selector, callback) {
  * Add a selector to watch for when a matching
  * element becomes available in the DOM
  *
- * @param {String} selector
+ * @param {String|Document} selector
  * @param {Function} callback
  * @return {Function}
  * @api public
@@ -93,7 +109,14 @@ export default function ready(selector, callback) {
             subtree: true
         });
     }
-    listeners.push({selector, callback});
-    Array.from(doc.querySelectorAll(selector)).forEach((el) => callback.call(el, el));
-    return () => removeListener(selector, callback);
+    if (selector === doc && docReady) {
+        callback.call(doc, doc);
+        return () => {};
+    }
+    const listener = {selector, callback};
+    listeners.push(listener);
+    if (typeof selector === 'string') {
+        Array.from(doc.querySelectorAll(selector)).forEach((el) => callback.call(el, el));
+    }
+    return () => removeListener(listener);
 }

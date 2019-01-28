@@ -39,6 +39,19 @@ describe('ready', () => {
         requestAnimationFrame(() => document.body.appendChild(element));
     });
 
+    it('should support invoking a callback when the DOM has finished loading by passing the document', (done) => {
+        const spy = sinon.spy((el) => {
+            expect(spy.calledOnce).to.equal(true);
+            expect(el).to.equal(document);
+            expect(spy.calledOn(el)).to.equal(true);
+            expect(/complete|loaded|interactive/.test(document.readyState)).to.equal(true);
+
+            done();
+        });
+
+        ready(document, spy);
+    });
+
     it('should invoke the callback for multiple elements that match the selector', (done) => {
         const elements = [];
         const frag = document.createDocumentFragment();
