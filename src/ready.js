@@ -4,49 +4,69 @@
 let observer;
 const listeners = [];
 const doc = window.document;
+const documentElement = doc.documentElement;
 
 /*
- * Checks a selector for new matching
- * elements and invokes the callback
- * if one is found
+ * Find the supported version of `matches`
+ * to use
+ */
+const matchesFn = [
+    'matches',
+    'webkitMatchesSelector',
+    'msMatchesSelector'
+].reduce((fn, name) => {
+    if (fn) {
+        return fn;
+    }
+    return name in documentElement ? name : fn;
+}, null);
+
+/*
+ * Checks if an element matches a given
+ * CSS selector
  *
+ * @param {Element} el
  * @param {String} selector
- * @param {Function} fn
+ * @return {Boolean}
  * @api private
  */
-function checkSelector(selector, fn) {
-    const elements = doc.querySelectorAll(selector);
-    for (let i = 0, len = elements.length; i < len; i++) {
-        const element = elements[i];
-        if (!element.ready) {
-            element.ready = true;
-            fn.call(element, element);
-        }
-    }
+function matches(el, selector) {
+    return el[matchesFn](selector);
 }
 
 /*
- * Check all selectors for new elements
- * following a change in the DOM
+ * Check mutations for added nodes
+ * that match a selector string and
+ * invoke the callback function if it
+ * does
  *
+ * @param {Array} mutations
  * @api private
  */
-function checkListeners() {
-    listeners.forEach((listener) => checkSelector(listener.selector, listener.fn));
+function checkMutations(mutations) {
+    for (const mutation of mutations) {
+        for (const element of mutation.addedNodes) {
+            listeners.forEach((listener) => {
+                if (element.nodeType === 1 && matches(element, listener.selector)) {
+                    listener.callback.call(element, element);
+                }
+            });
+        }
+    }
 }
 
 /*
  * Remove a listener
  *
  * @param {String} selector
- * @param {Function} fn
+ * @param {Function} callback
  * @api private
  */
-function removeListener(selector, fn) {
+function removeListener(selector, callback) {
     let i = listeners.length;
     while (i--) {
         const listener = listeners[i];
-        if (listener.selector === selector && listener.fn === fn) {
+        if (listener.selector === selector && listener.callback === callback) {
             listeners.splice(i, 1);
             if (!listeners.length && observer) {
                 observer.disconnect();
@@ -61,19 +81,19 @@ function removeListener(selector, fn) {
  * element becomes available in the DOM
  *
  * @param {String} selector
- * @param {Function} fn
+ * @param {Function} callback
  * @return {Function}
  * @api public
  */
-export default function ready(selector, fn) {
+export default function ready(selector, callback) {
     if (!observer) {
-        observer = new MutationObserver(checkListeners);
+        observer = new MutationObserver(checkMutations);
         observer.observe(doc.documentElement, {
             childList: true,
             subtree: true
         });
     }
-    listeners.push({selector, fn});
-    checkSelector(selector, fn);
-    return () => removeListener(selector, fn);
+    listeners.push({selector, callback});
+    Array.from(doc.querySelectorAll(selector)).forEach((el) => callback.call(el, el));
+    return () => removeListener(selector, callback);
 }
