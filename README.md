@@ -11,7 +11,7 @@
 Download the [development](https://github.com/ryanmorr/ready/raw/master/dist/ready.js) or [minified](https://github.com/ryanmorr/ready/raw/master/dist/ready.min.js) version, or install via NPM:
 
 ``` sh
-npm install ryanmorr/ready
+npm install @ryanmorr/ready
 ```
 
 ## Usage
