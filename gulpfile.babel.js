@@ -15,6 +15,7 @@ import { Server } from 'karma';
 const banner = `/*! ${pkg.name} v${pkg.version} | ${pkg.homepage} */\n`;
 
 const config = {
+    name: 'ready',
     files: './src/**/*.js',
     entryFile: './src/ready.js',
     outputFile: 'ready.js',
@@ -47,7 +48,7 @@ gulp.task('clean', () => {
 });
 
 gulp.task('build', ['clean'], () => {
-    return browserify(config.entryFile, {debug: true, standalone: pkg.name})
+    return browserify(config.entryFile, {debug: true, standalone: config.name})
         .transform(babelify)
         .bundle()
         .pipe(source(config.outputFile))
