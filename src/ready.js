@@ -64,10 +64,11 @@ function matches(el, selector) {
 function checkMutations(mutations) {
     for (const mutation of mutations) {
         for (const element of mutation.addedNodes) {
+            if (element.nodeType !== 1) continue;
             listeners.forEach((listener) => {
-                if (element.nodeType === 1 && matches(element, listener.selector)) {
-                    listener.callback.call(element, element);
-                }
+                const items = Array.from(element.querySelectorAll(listener.selector));
+                if (matches(element, listener.selector)) items.push(element);
+                items.forEach((el) => listener.callback.call(el, el));
             });
         }
     }

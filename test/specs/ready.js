@@ -79,6 +79,54 @@ describe('ready', () => {
         requestAnimationFrame(() => document.body.appendChild(frag));
     });
 
+    it('should invoke the callback for descendant element that matches the selector', (done) => {
+        const child = document.createElement('div');
+        child.className = 'kid';
+
+        const element = document.createElement('div');
+        element.className = 'bar';
+        element.appendChild(child);
+
+        const spy = sinon.spy((added) => {
+            expect(spy.calledOnce).to.equal(true);
+            expect(added).to.equal(child);
+            expect(document.body.contains(added)).to.equal(true);
+            expect(spy.calledOn(added)).to.equal(true);
+
+            document.body.removeChild(element);
+            off();
+            done();
+        });
+
+        const off = ready('.kid', spy);
+
+        requestAnimationFrame(() => document.body.appendChild(element));
+    });
+
+    it('should invoke the callback for descendant element that matches complex selector', (done) => {
+        const child = document.createElement('div');
+        child.className = 'kid';
+
+        const element = document.createElement('div');
+        element.className = 'bar';
+        element.appendChild(child);
+
+        const spy = sinon.spy((added) => {
+            expect(spy.calledOnce).to.equal(true);
+            expect(added).to.equal(child);
+            expect(document.body.contains(added)).to.equal(true);
+            expect(spy.calledOn(added)).to.equal(true);
+
+            document.body.removeChild(element);
+            off();
+            done();
+        });
+
+        const off = ready('.bar > .kid', spy);
+
+        requestAnimationFrame(() => document.body.appendChild(element));
+    });
+
     it('should return a function that stops observing for new elements when invoked', (done) => {
         const element = document.createElement('div');
         element.className = 'bar';
