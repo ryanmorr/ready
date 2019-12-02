@@ -9,7 +9,7 @@ describe('ready', () => {
         const spy = sinon.spy();
         const off = ready('#foo', spy);
 
-        expect(spy.calledOnce).to.equal(true);
+        expect(spy.callCount).to.equal(1);
         const element = spy.getCall(0).args[0];
         expect(element).to.equal(div);
         expect(document.body.contains(element)).to.equal(true);
@@ -24,7 +24,7 @@ describe('ready', () => {
         element.className = 'bar';
 
         const spy = sinon.spy((added) => {
-            expect(spy.calledOnce).to.equal(true);
+            expect(spy.callCount).to.equal(1);
             expect(added).to.equal(element);
             expect(document.body.contains(added)).to.equal(true);
             expect(spy.calledOn(added)).to.equal(true);
@@ -41,7 +41,7 @@ describe('ready', () => {
 
     it('should support invoking a callback when the DOM has finished loading by passing the document', (done) => {
         const spy = sinon.spy((el) => {
-            expect(spy.calledOnce).to.equal(true);
+            expect(spy.callCount).to.equal(1);
             expect(el).to.equal(document);
             expect(spy.calledOn(el)).to.equal(true);
             expect(/complete|loaded|interactive/.test(document.readyState)).to.equal(true);
@@ -67,7 +67,7 @@ describe('ready', () => {
             expect(document.body.contains(added)).to.equal(true);
             expect(spy.calledOn(added)).to.equal(true);
 
-            if (spy.calledThrice) {
+            if (spy.callCount === 3) {
                 elements.forEach((el) => document.body.removeChild(el));
                 off();
                 done();
@@ -77,6 +77,50 @@ describe('ready', () => {
         const off = ready('.baz.qux', spy);
 
         requestAnimationFrame(() => document.body.appendChild(frag));
+    });
+    
+    it('should support selectors with combinators', (done) => {
+        const element = document.createElement('div');
+        element.className = 'foo';
+
+        const child = document.createElement('div');
+        child.className = 'bar';
+        element.appendChild(child);
+
+        const spy = sinon.spy((added) => {
+            expect(added).to.equal(child);
+            expect(document.body.contains(child)).to.equal(true);
+            expect(spy.calledOn(added)).to.equal(true);
+
+            document.body.removeChild(element);
+            off();
+            done();
+        });
+
+        const off = ready('.foo .bar', spy);
+
+        requestAnimationFrame(() => document.body.appendChild(element));
+    });
+
+    it('should only invoke the callback function once per element despite multiple insertions into the DOM', (done) => {
+        const element = document.createElement('div');
+        element.className = 'foo';
+        document.body.appendChild(element);
+
+        const spy = sinon.spy();
+        const off = ready('.foo', spy);
+
+        expect(spy.callCount).to.equal(1);
+        document.body.removeChild(element);
+
+        document.body.appendChild(element);
+
+        requestAnimationFrame(() => {
+            expect(spy.callCount).to.equal(1);
+            document.body.removeChild(element);
+            off();
+            done();
+        });
     });
 
     it('should return a function that stops observing for new elements when invoked', (done) => {
@@ -109,5 +153,5 @@ describe('ready', () => {
         expect(mutationSpy.called).to.equal(true);
 
         mutationSpy.restore();
-    });
+    });/**/
 });
