@@ -1,6 +1,7 @@
 let observer;
 const listeners = [];
 const doc = window.document;
+const IS_READY = Symbol('ready');
 let docReady = /complete|loaded|interactive/.test(doc.readyState);
 
 if (!docReady) {
@@ -21,8 +22,8 @@ function checkListener({selector, callback}) {
     const elements = doc.querySelectorAll(selector);
     for (let i = 0, len = elements.length; i < len; i++) {
         const element = elements[i];
-        if (!element.ready) {
-            element.ready = true;
+        if (!element[IS_READY]) {
+            element[IS_READY] = true;
             callback.call(element, element);
         }
     }
