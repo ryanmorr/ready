@@ -47,16 +47,20 @@ function removeListener(listener) {
 }
 
 export default function ready(selector, callback) {
+    if (typeof selector === 'function') {
+        callback = selector;
+        selector = doc;
+        if (docReady) {
+            callback.call(doc, doc);
+            return () => null;
+        }
+    }
     if (!observer) {
         observer = new MutationObserver(checkListeners);
         observer.observe(doc.documentElement, {
             childList: true,
             subtree: true
         });
-    }
-    if (selector === doc && docReady) {
-        callback.call(doc, doc);
-        return () => null;
     }
     const listener = {selector, callback};
     listeners.push(listener);

@@ -8,7 +8,7 @@
 
 ## Install
 
-Download the [development](https://github.com/ryanmorr/ready/raw/master/dist/ready.js) or [minified](https://github.com/ryanmorr/ready/raw/master/dist/ready.min.js) version, or install via NPM:
+Download the [CommonJS](http://github.com/ryanmorr/ready/raw/master/dist/ready.cjs.js), [ES Module](http://github.com/ryanmorr/ready/raw/master/dist/ready.esm.js), or [UMD](http://github.com/ryanmorr/ready/raw/master/dist/ready.umd.js) versions. Or install via NPM:
 
 ``` sh
 npm install @ryanmorr/ready
@@ -26,10 +26,10 @@ const off = ready('.foo', (element) => {
 
 When any element matching the selector becomes available, the callback is invoked in the context of the element as well as passing it as the only parameter. If multiple elements are found, the callback is invoked in succession for each element in document order.
 
-Alternatively, provide the document element as the first argument to add a generic DOM ready event listener:
+Alternatively, provide just the callback function as the only argument to add a generic DOM ready event listener:
 
 ``` javascript
-ready(document, (doc) => {
+ready((doc) => {
     // The DOM is ready
 });
 ```

@@ -39,19 +39,6 @@ describe('ready', () => {
         requestAnimationFrame(() => document.body.appendChild(element));
     });
 
-    it('should support invoking a callback when the DOM has finished loading by passing the document', (done) => {
-        const spy = sinon.spy((el) => {
-            expect(spy.callCount).to.equal(1);
-            expect(el).to.equal(document);
-            expect(spy.calledOn(el)).to.equal(true);
-            expect(/complete|loaded|interactive/.test(document.readyState)).to.equal(true);
-
-            done();
-        });
-
-        ready(document, spy);
-    });
-
     it('should invoke the callback for multiple elements that match the selector', (done) => {
         const elements = [];
         const frag = document.createDocumentFragment();
@@ -78,7 +65,7 @@ describe('ready', () => {
 
         requestAnimationFrame(() => document.body.appendChild(frag));
     });
-    
+
     it('should support selectors with combinators', (done) => {
         const element = document.createElement('div');
         element.className = 'foo';
@@ -100,6 +87,19 @@ describe('ready', () => {
         const off = ready('.foo .bar', spy);
 
         requestAnimationFrame(() => document.body.appendChild(element));
+    });
+
+    it('should support a generic DOM ready listener by providing the callback function as the only argument', (done) => {
+        const spy = sinon.spy((el) => {
+            expect(spy.callCount).to.equal(1);
+            expect(el).to.equal(document);
+            expect(spy.calledOn(el)).to.equal(true);
+            expect(/complete|loaded|interactive/.test(document.readyState)).to.equal(true);
+
+            done();
+        });
+
+        ready(spy);
     });
 
     it('should only invoke the callback function once per element despite multiple insertions into the DOM', (done) => {
