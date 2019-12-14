@@ -1,4 +1,4 @@
-let observer;
+let observer = null;
 const listeners = [];
 const doc = window.document;
 const IS_READY = Symbol('ready');
@@ -7,12 +7,11 @@ let docReady = /complete|loaded|interactive/.test(doc.readyState);
 if (!docReady) {
     doc.addEventListener('DOMContentLoaded', () => {
         docReady = true;
-        let i = listeners.length;
-        while (i--) {
+        for(let i = 0, len = listeners.length; i < len; i++) {
             const listener = listeners[i];
             if (listener.selector === doc) {
                 listener.callback.call(doc, doc);
-                listeners.splice(i, 1);
+                listeners.splice(i--, 1);
             }
         }
     });
@@ -30,17 +29,15 @@ function checkListener({selector, callback}) {
 }
 
 function checkListeners() {
-    listeners.forEach((listener) => checkListener(listener));
+    listeners.forEach(checkListener);
 }
 
 function removeListener(listener) {
-    let i = listeners.length;
-    while (i--) {
-        if (listener === listeners[i]) {
-            listeners.splice(i, 1);
-        }
+    let index = listeners.indexOf(listener);
+    if (index !== -1) {
+        listeners.splice(index, 1);
     }
-    if (!listeners.length && observer) {
+    if (listeners.length === 0 && observer != null) {
         observer.disconnect();
         observer = null;
     }
