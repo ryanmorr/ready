@@ -8,7 +8,7 @@
 
 ## Install
 
-Download the [CommonJS](http://github.com/ryanmorr/ready/raw/master/dist/ready.cjs.js), [ES Module](http://github.com/ryanmorr/ready/raw/master/dist/ready.esm.js), or [UMD](http://github.com/ryanmorr/ready/raw/master/dist/ready.umd.js) versions. Or install via NPM:
+Download the [CJS](https://github.com/ryanmorr/ready/raw/master/dist/ready.cjs.js), [ESM](https://github.com/ryanmorr/ready/raw/master/dist/ready.esm.js), [UMD](https://github.com/ryanmorr/ready/raw/master/dist/ready.umd.js) versions or install via NPM:
 
 ``` sh
 npm install @ryanmorr/ready
