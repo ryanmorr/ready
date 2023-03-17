@@ -1,7 +1,7 @@
 {
   "name": "@ryanmorr/ready",
   "description": "Detect element availability on the initial page load and those dynamically appended to the DOM",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "license": "Unlicense",
   "author": "Ryan Morr",
   "homepage": "https://github.com/ryanmorr/ready",
