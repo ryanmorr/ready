@@ -1,40 +1,45 @@
-import pkg from './package.json';
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import minify from 'rollup-plugin-babel-minify';
+import fs from 'node:fs/promises';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import terser from '@rollup/plugin-terser';
+import generatePackageJSON from 'rollup-plugin-generate-package-json';
 
-const banner = `/*! ${pkg.name} v${pkg.version} | ${pkg.homepage} */`;
+export default async () => {
+    const pkg = JSON.parse(await fs.readFile('package.json'));
+    const banner = `/*! ${pkg.name} v${pkg.version} | ${pkg.homepage} */`;
 
-export default {
-    input: 'src/ready.js',
-    output: [
-        {
-            banner,
-            name: 'ready',
-            file: pkg.browser,
-            format: 'umd',
-            sourcemap: 'inline'
-        },
-        {
-            banner,
-            file: pkg.main,
-            format: 'cjs',
-            sourcemap: 'inline'
-        },
-        {
-            banner,
-            file: pkg.module,
-            format: 'esm',
-            sourcemap: 'inline'
-        }
-    ],
-    plugins: [
-        resolve(),
-        babel({
-            exclude: 'node_modules/**'
-        }),
-        commonjs(),
-        minify()
-    ]
+    return {
+        input: 'src/ready.js',
+        output: [
+            {
+                banner,
+                name: 'ready',
+                file: pkg.browser,
+                format: 'umd'
+            },
+            {
+                banner,
+                file: pkg.main,
+                format: 'cjs',
+                plugins: [
+                    generatePackageJSON({
+                        baseContents: {
+                            type: 'commonjs'
+                        },
+                        outputFolder: 'dist/cjs'
+                    })
+                ]
+            },
+            {
+                banner,
+                file: pkg.module,
+                format: 'esm'
+            }
+        ],
+        plugins: [
+            resolve(),
+            commonjs(),
+            terser()
+        ]
+    };
 };

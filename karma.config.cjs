@@ -1,6 +1,5 @@
-const babel = require('rollup-plugin-babel');
-const resolve = require('rollup-plugin-node-resolve');
-const commonjs = require('rollup-plugin-commonjs');
+const resolve = require('@rollup/plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
 
 const specs = 'test/specs/**/*.js';
 
@@ -19,9 +18,6 @@ module.exports = function(config) {
             },
             plugins: [
                 resolve(),
-                babel({
-                    exclude: 'node_modules/**'
-                }),
                 commonjs()
             ]
         },
@@ -30,4 +26,4 @@ module.exports = function(config) {
         autoWatch: false,
         singleRun: true
     });
-}
+};
